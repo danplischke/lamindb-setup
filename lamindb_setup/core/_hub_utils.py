@@ -43,28 +43,37 @@ class LaminDsn(str):
             raise ValueError(f"Invalid value for LaminDsn: {v}")
 
     @property
+    def _parsed(self):
+        """Cache the parsed URL to avoid repeated urlparse() calls."""
+        try:
+            return self.__parsed
+        except AttributeError:
+            self.__parsed = urlparse(self)
+            return self.__parsed
+
+    @property
     def user(self) -> str | None:
-        return urlparse(self).username
+        return self._parsed.username
 
     @property
     def password(self) -> str | None:
-        return urlparse(self).password
+        return self._parsed.password
 
     @property
     def host(self) -> str | None:
-        return urlparse(self).hostname
+        return self._parsed.hostname
 
     @property
     def port(self) -> int | None:
-        return urlparse(self).port
+        return self._parsed.port
 
     @property
     def database(self) -> str:
-        return urlparse(self).path.lstrip("/")
+        return self._parsed.path.lstrip("/")
 
     @property
     def scheme(self) -> str:
-        return urlparse(self).scheme
+        return self._parsed.scheme
 
     @classmethod
     def build(

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import functools
 import importlib as il
-import inspect
 import os
+import sys
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -75,11 +75,16 @@ def _check_module_in_instance_modules(
 
 # infer the name of the module that calls this function
 def _infer_callers_module_name() -> str | None:
-    stack = inspect.stack()
-    if len(stack) < 3:
+    try:
+        # sys._getframe is much faster than inspect.stack() since it doesn't
+        # walk the entire call stack or create FrameInfo objects
+        frame = sys._getframe(2)
+    except ValueError:
         return None
-    module = inspect.getmodule(stack[2][0])
-    return module.__name__.partition(".")[0] if module is not None else None
+    module_name = frame.f_globals.get("__name__")
+    if module_name is None:
+        return None
+    return module_name.partition(".")[0]
 
 
 # we make this a private function because in all the places it's used,
