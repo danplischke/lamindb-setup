@@ -89,7 +89,7 @@ class Locker:
                     continue
                 if self.mapper[user_endpoint] == b"0":
                     continue
-                period = (datetime.now() - self.modified(user_path)).total_seconds()
+                period = (datetime.now(timezone.utc) - self.modified(user_path)).total_seconds()
                 if period > EXPIRATION_TIME:
                     logger.info(
                         f"the lock of the user {user} seems to be stale, clearing"
@@ -102,11 +102,11 @@ class Locker:
 
     def modified(self, path):
         mtime = self.fs.modified(path)
-        # always convert to the local timezone before returning
+        # always convert to UTC before returning
         # assume in utc if the time zone is not specified
         if mtime.tzinfo is None:
             mtime = mtime.replace(tzinfo=timezone.utc)
-        return mtime.astimezone().replace(tzinfo=None)
+        return mtime.astimezone(timezone.utc)
 
     def _msg_on_counter(self, user):
         if self._counter == MAX_MSG_COUNTER:

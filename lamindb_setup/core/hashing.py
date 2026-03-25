@@ -123,10 +123,12 @@ def hash_dir(path: Path) -> tuple[int, str, str, int]:
         n_workers = psutil.cpu_count()
     if n_workers > 1:
         with ThreadPoolExecutor(n_workers) as pool:
-            hashes_sizes = pool.map(hash_size, files)
+            hashes_sizes = list(pool.map(hash_size, files))
     else:
-        hashes_sizes = map(hash_size, files)
-    hashes, sizes = zip(*hashes_sizes, strict=False)
+        hashes_sizes = list(map(hash_size, files))
+    if not hashes_sizes:
+        return 0, "", "md5-d", 0
+    hashes, sizes = zip(*hashes_sizes, strict=True)
 
     hash, hash_type = hash_from_hashes_list(hashes), "md5-d"
     n_files = len(hashes)

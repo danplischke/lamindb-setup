@@ -21,10 +21,12 @@ from .core._settings_user import UserSettings
 
 
 def load_user(email: str | None = None, handle: str | None = None) -> UserSettings:
-    if email is not None:
-        settings_file = user_settings_file_email(email)
+    if email is None and handle is None:
+        raise ValueError("Please provide either 'email' or 'handle'.")
     if handle is not None:
         settings_file = user_settings_file_handle(handle)
+    elif email is not None:
+        settings_file = user_settings_file_email(email)
     if settings_file.exists():
         user_settings = load_user_settings(settings_file)
         save_user_settings(user_settings)  # needed to save to current_user.env
