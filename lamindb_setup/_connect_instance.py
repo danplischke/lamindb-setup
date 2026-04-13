@@ -201,6 +201,8 @@ def reset_django_module_variables():
     from django.apps import apps
 
     app_names = {app.name for app in apps.get_app_configs()}
+    # build a tuple of prefixes for efficient startswith matching
+    app_name_prefixes = tuple(app_names)
     # always copy before iterations over sys.modules
     # see https://docs.python.org/3/library/sys.html#sys.modules
     # this whole thing runs about 50ms in a big env
@@ -225,9 +227,7 @@ def reset_django_module_variables():
                     elif hasattr(v, "__module__") and getattr(v, "__module__", None):
                         class_module = v.__module__
                         # Check if the class module starts with any of our app names
-                        if any(
-                            class_module.startswith(app_name) for app_name in app_names
-                        ):
+                        if class_module.startswith(app_name_prefixes):
                             if class_module in sys.modules:
                                 fresh_module = sys.modules[class_module]
                                 attr_name = getattr(v, "__name__", k)

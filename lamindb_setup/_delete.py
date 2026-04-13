@@ -40,8 +40,7 @@ def delete_by_isettings(isettings: InstanceSettings) -> None:
     assert isettings.slug != "none/none"
 
     settings_file = isettings._get_settings_file()
-    if settings_file.exists():
-        settings_file.unlink()
+    settings_file.unlink(missing_ok=True)
     delete_cache(isettings)
     if isettings.dialect == "sqlite" and isettings.storage is not None:
         try:

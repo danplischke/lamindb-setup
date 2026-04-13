@@ -136,10 +136,20 @@ class AWSOptionsManager:
     def _find_root(self, path_str: str) -> str | None:
         if path_str in self._sessions_cache:
             return path_str
-        for root in sorted(self._sessions_cache, key=len, reverse=True):
+        # sort by length descending to match longest (most specific) prefix first
+        for root in self._sorted_roots_cache:
             if path_str.startswith(root):
                 return root
         return None
+
+    @property
+    def _sorted_roots_cache(self) -> list[str]:
+        """Cached sorted roots list, invalidated when sessions cache changes."""
+        cache_keys = frozenset(self._sessions_cache.keys())
+        if not hasattr(self, "_sorted_roots") or self._sorted_roots_keys != cache_keys:
+            self._sorted_roots = sorted(self._sessions_cache, key=len, reverse=True)
+            self._sorted_roots_keys = cache_keys
+        return self._sorted_roots
 
     @staticmethod
     def _make_refresh_callback(storage_root: str, access_token: str | None = None):

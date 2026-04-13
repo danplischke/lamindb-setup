@@ -254,7 +254,7 @@ def _import_registry(
 
     for col in df.columns:
         if df[col].dtype == "object":
-            mask = df[col].apply(lambda x: isinstance(x, (dict, list, np.ndarray)))
+            mask = df[col].map(type).isin((dict, list, np.ndarray))
             if mask.any():
                 df.loc[mask, col] = df.loc[mask, col].map(_serialize_value)
 

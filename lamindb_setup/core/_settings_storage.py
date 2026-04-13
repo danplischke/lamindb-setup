@@ -46,13 +46,13 @@ def instance_uid_from_uuid(instance_id: UUID) -> str:
     return hash_and_encode_as_b62(instance_id.hex)[:12]
 
 
-def get_storage_type(root_as_str: str) -> StorageType:
-    import fsspec
+_STORAGE_TYPE_CONVERT = {"file": "local"}
 
-    convert = {"file": "local"}
+
+def get_storage_type(root_as_str: str) -> StorageType:
     # init_storage checks that the root protocol belongs to VALID_PROTOCOLS
     protocol = fsspec.utils.get_protocol(root_as_str)
-    return convert.get(protocol, protocol)  # type: ignore
+    return _STORAGE_TYPE_CONVERT.get(protocol, protocol)  # type: ignore
 
 
 def sanitize_root_user_input(root: UPathStr) -> UPath:
